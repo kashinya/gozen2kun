@@ -1,0 +1,10 @@
+[
+  { "id": "st-2025r07h", "src": "2025r07h", "category": "ST", "label": "令和7年度 春期", "title": "ITストラテジスト試験", "section": "午前Ⅱ" },
+  { "id": "st-2024r06h", "src": "2024r06h", "category": "ST", "label": "令和6年度 春期", "title": "ITストラテジスト試験", "section": "午前Ⅱ" },
+  { "id": "st-2023r05h", "src": "2023r05h", "category": "ST", "label": "令和5年度 春期", "title": "ITストラテジスト試験", "section": "午前Ⅱ" },
+  { "id": "st-2022r04h", "src": "2022r04h", "category": "ST", "label": "令和4年度 春期", "title": "ITストラテジスト試験", "section": "午前Ⅱ" },
+  { "id": "st-2021r03h", "src": "2021r03h", "category": "ST", "label": "令和3年度 春期", "title": "ITストラテジスト試験", "section": "午前Ⅱ" },
+  { "id": "st-2019r01a", "src": "2019r01a", "category": "ST", "label": "令和元年度 秋期", "title": "ITストラテジスト試験", "section": "午前Ⅱ" },
+  { "id": "st-2018h30a", "src": "2018h30a", "category": "ST", "label": "平成30年度 秋期", "title": "ITストラテジスト試験", "section": "午前Ⅱ" },
+  { "id": "st-2017h29a", "src": "2017h29a", "category": "ST", "label": "平成29年度 秋期", "title": "ITストラテジスト試験", "section": "午前Ⅱ" }
+]
