@@ -113,6 +113,32 @@ await page.screenshot({ path: `${shots}/06-drill.png`, fullPage: true });
 await page.click('#quit');
 await page.click('#home');
 
+// --- Explanation: shown after a wrong answer only, with the unverified label and all 4 choices.
+const exQ = data.questions.find((q) => q.explanation && !q.needs_review);
+if (exQ) {
+  await page.selectOption('#drill-sel', exQ.exam);
+  await page.click('#start-drill');
+  let shownOnCorrect = false;
+  for (;;) {
+    const s = (await store()).session;
+    if (s.qids[s.cur] === exQ.id) break;
+    await page.click(`[data-ans="${byId.get(s.qids[s.cur]).answer}"]`);
+    if (await page.$('.expl')) shownOnCorrect = true;
+    await page.click('#next');
+  }
+  check('no explanation after a correct answer', !shownOnCorrect);
+  await page.click(`[data-ans="${wrongOf(exQ.answer)}"]`);
+  const ex = await page.$('.expl');
+  const exText = ex ? await ex.textContent() : '';
+  const items = ex ? (await ex.$$('li')).length : 0;
+  check('explanation shown after a wrong answer', !!ex && exText.includes('AI作成・未検証') && items === 4 && exText.includes(exQ.explanation.correct), exQ.id);
+  await page.screenshot({ path: `${shots}/06b-explanation.png`, fullPage: true });
+  await page.click('#quit');
+  await page.click('#home');
+} else {
+  check('explanation shown after a wrong answer', false, 'no question has an explanation');
+}
+
 // --- Image question screenshot.
 const imgQ = data.questions.find((q) => q.display === 'image' && !q.needs_review);
 if (imgQ) {

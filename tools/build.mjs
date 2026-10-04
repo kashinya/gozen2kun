@@ -7,6 +7,8 @@ const exams = JSON.parse(fs.readFileSync('data-src/exams.json', 'utf8'));
 const answers = JSON.parse(fs.readFileSync('data-src/answers.json', 'utf8'));
 // Manual decisions: { "<qid>": { "fix": { "stem"|"ア".. : "text" }, "display": "image", "needs_review": "reason" } }
 const review = JSON.parse(fs.readFileSync('data-src/review.json', 'utf8'));
+// AI-written explanations that passed the cross-check: { "<qid>": { "correct": "...", "choices": { "ア": "..", .. } } }
+const explanations = fs.existsSync('data-src/explanations.json') ? JSON.parse(fs.readFileSync('data-src/explanations.json', 'utf8')) : {};
 
 // Characters allowed in transcribed text; anything else is reported as possible garbling.
 const ALLOWED = /^[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}ー々〆ヶ\x20-\x7E，。、・：；？！「」『』（）［］〔〕｛｝【】＜＞≦≧＝＋－×÷／％～…“”‘’―\n　①②③④⑤⑥⑦⑧⑨⑩ⅠⅡⅢⅣⅤ→←↑↓○●△▲□■◎※〜＿｜＆＃＄＊＠Ａ-Ｚａ-ｚ０-９]*$/u;
@@ -37,6 +39,12 @@ for (const e of exams) {
     for (const [k, v] of Object.entries(r.fix || {})) {
       if (k === 'stem') q.stem = v;
       else q.choices[k] = v;
+    }
+    const ex = explanations[id];
+    if (ex) {
+      const okEx = ex.correct?.trim() && LABELS.every((l) => ex.choices?.[l]?.trim()) && !/�/.test(JSON.stringify(ex));
+      if (okEx) q.explanation = { correct: ex.correct, choices: Object.fromEntries(LABELS.map((l) => [l, ex.choices[l]])) };
+      else problems.push(`${id}: explanation is incomplete, not used`);
     }
     const reasons = [];
     if (r.needs_review) reasons.push(r.needs_review);
@@ -74,7 +82,7 @@ fs.mkdirSync('data', { recursive: true });
 fs.writeFileSync('data/questions.json', JSON.stringify(out, null, 1));
 
 const nr = out.questions.filter((q) => q.needs_review);
-console.log(`questions: ${out.questions.length}, active: ${out.questions.length - nr.length}, needs_review: ${nr.length}`);
+console.log(`questions: ${out.questions.length}, active: ${out.questions.length - nr.length}, needs_review: ${nr.length}, explanations: ${out.questions.filter((q) => q.explanation).length}`);
 for (const e of out.exams) {
   const qs = out.questions.filter((q) => q.exam === e.id);
   console.log(`  ${e.label}: ${qs.length}問 (text ${qs.filter((q) => q.display === 'text').length}, image ${qs.filter((q) => q.display === 'image').length}, needs_review ${qs.filter((q) => q.needs_review).length})`);

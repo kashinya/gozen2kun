@@ -128,7 +128,26 @@ function bindQuestionEvents() {
       b.textContent = box.hidden ? '原文の画像を見る' : '原文の画像を閉じる';
     })
   );
+  $app.querySelector('[data-goto-expl]')?.addEventListener('click', () => document.getElementById('expl')?.scrollIntoView({ behavior: 'smooth' }));
   $app.querySelectorAll('[data-zoom]').forEach((w) => w.addEventListener('click', () => w.classList.toggle('zoom')));
+}
+// Shown only after a wrong answer. Explanations are AI-written and unverified (IPA publishes none).
+function explanationCard(q, mine) {
+  const ex = q.explanation;
+  if (!ex) return '';
+  const items = LABELS.map((l) => {
+    const tag = l === q.answer ? '<small class="tag ok">正解</small>' : l === mine ? '<small class="tag ng">あなたの解答</small>' : '';
+    return `<li><span class="lbl">${l}</span><span>${tag}${esc(ex.choices[l])}</span></li>`;
+  }).join('');
+  return `<section class="card expl" id="expl">
+    <div class="expl-head"><b>解説</b><span class="badge">AI作成・未検証</span></div>
+    <p>${esc(ex.correct)}</p>
+    <ul class="choices-text">${items}</ul>
+    <p class="muted">IPAは午前の解説を公表していないため、この解説はAIが作成したもので、誤りを含む可能性があります。正解はIPAの解答例に基づいています。</p>
+  </section>`;
+}
+function explanationHint(q, ok) {
+  return !ok && q.explanation ? '<br><button class="linkish" type="button" data-goto-expl>解説を見る ↓</button>' : '';
 }
 function answerButtons(selected, reveal) {
   return `<div class="answers">${LABELS.map((l) => {
@@ -362,8 +381,9 @@ function viewReview(idx, i) {
   const ok = mine === q.answer;
   render(`
     ${questionHead(q, `第${i + 1}問 / ${r.qids.length}`)}
-    <div class="feedback ${ok ? 'ok' : 'ng'}">${ok ? '正解' : '不正解'}　正解：${q.answer}　あなた：${mine || '未解答'}</div>
+    <div class="feedback ${ok ? 'ok' : 'ng'}">${ok ? '正解' : '不正解'}　正解：${q.answer}　あなた：${mine || '未解答'}${explanationHint(q, ok)}</div>
     <div class="card">${questionBody(q)}</div>
+    ${ok ? '' : explanationCard(q, mine)}
     <div class="pad">
       ${answerButtons(mine, { answer: q.answer })}
       <div class="nav">
@@ -410,12 +430,13 @@ function viewDrill() {
     const nbMsg = s.kind === 'notebook' || nbState || !res.ok
       ? (!res.ok ? '間違いノートに入りました。' : nbState ? `卒業まであと${GRADUATE_STREAK - nbState.streak}回。` : '間違いノートから卒業！')
       : '';
-    feedback = `<div class="feedback ${res.ok ? 'ok' : 'ng'}">${res.ok ? '正解' : '不正解'}　正解：${q.answer}${nbMsg ? `<br><small>${nbMsg}</small>` : ''}</div>`;
+    feedback = `<div class="feedback ${res.ok ? 'ok' : 'ng'}">${res.ok ? '正解' : '不正解'}　正解：${q.answer}${nbMsg ? `<br><small>${nbMsg}</small>` : ''}${explanationHint(q, res.ok)}</div>`;
   }
   render(`
     ${questionHead(q, `${s.cur + 1} / ${s.qids.length}`)}
     ${feedback}
     <div class="card">${questionBody(q)}</div>
+    ${res && !res.ok ? explanationCard(q, res.choice) : ''}
     <div class="pad">
       ${answerButtons(res ? res.choice : null, res ? { answer: q.answer } : null)}
       <div class="nav">

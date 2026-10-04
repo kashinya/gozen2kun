@@ -160,3 +160,12 @@ table.stats th:first-child, table.stats td:first-child { text-align: left; }
 
 .notice { background: var(--sel); border-radius: 10px; padding: 10px 12px; font-size: 14px; }
 .footer-note { margin-top: 28px; font-size: 12.5px; color: var(--muted); }
+
+/* Explanation (AI-written, unverified) */
+.expl { margin-top: 12px; scroll-margin-top: 72px; }
+.expl-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.expl .badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ng); color: var(--ng); }
+.expl p { line-height: 1.7; margin: 0 0 10px; }
+.expl .tag { display: inline-block; font-size: 12px; font-weight: 700; margin-right: 6px; }
+.expl .tag.ok { color: var(--ok); }
+.expl .tag.ng { color: var(--ng); }
